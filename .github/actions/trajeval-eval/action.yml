@@ -1,0 +1,113 @@
+name: "trajeval evaluate"
+description: >
+  Runs a trajeval evaluation against a config, compares it to a stored
+  baseline if one exists, comments a markdown diff table on the PR, and
+  fails the build if any metric regresses beyond its configured threshold.
+  Handles the no-baseline case gracefully (first run on a repo, or a
+  baseline that hasn't been committed yet): it still runs and uploads the
+  candidate result, just skips the comparison.
+
+inputs:
+  config:
+    description: "Path to trajeval.yaml"
+    required: false
+    default: "trajeval.yaml"
+  baseline-path:
+    description: >
+      Path to a baseline RunResult JSON already present in the checkout
+      (e.g. committed to the repo, or restored by a prior actions/cache or
+      actions/download-artifact step). If the file doesn't exist, the
+      comparison step is skipped rather than failing.
+    required: false
+    default: "results/baseline.json"
+  out-path:
+    description: "Where to write the candidate RunResult JSON"
+    required: false
+    default: "results/candidate.json"
+  python-version:
+    required: false
+    default: "3.11"
+  package-path:
+    description: >
+      Path to the trajeval package to install. Defaults to this repo's own
+      packages/trajeval — override once trajeval is published to PyPI and
+      you just want `pip install trajeval[cli]`.
+    required: false
+    default: "packages/trajeval[cli]"
+  comment-on-pr:
+    description: "Post the comparison table as a PR comment"
+    required: false
+    default: "true"
+
+outputs:
+  candidate-path:
+    description: "Path to the RunResult JSON this run produced"
+    value: ${{ steps.run.outputs.candidate-path }}
+  regressed:
+    description: "'true' if any configured regression threshold was violated"
+    value: ${{ steps.compare.outputs.regressed }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install trajeval
+      shell: bash
+      run: pip install -e "${{ inputs.package-path }}"
+
+    - name: Run evaluation
+      id: run
+      shell: bash
+      run: |
+        trajeval run --config "${{ inputs.config }}" --out "${{ inputs.out-path }}"
+        echo "candidate-path=${{ inputs.out-path }}" >> "$GITHUB_OUTPUT"
+
+    - name: Compare against baseline
+      id: compare
+      if: hashFiles(inputs.baseline-path) != ''
+      shell: bash
+      run: |
+        set +e
+        trajeval compare "${{ inputs.baseline-path }}" "${{ inputs.out-path }}" \
+          --config "${{ inputs.config }}" > comparison.md
+        status=$?
+        set -e
+        cat comparison.md
+        if [ "$status" -ne 0 ]; then
+          echo "regressed=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "regressed=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: No baseline found
+      if: hashFiles(inputs.baseline-path) == ''
+      shell: bash
+      run: |
+        echo "No baseline at ${{ inputs.baseline-path }} — skipping comparison." \
+          | tee comparison.md
+        echo "regressed=false" >> "$GITHUB_OUTPUT"
+
+    - name: Comment on PR
+      if: inputs.comment-on-pr == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const body = fs.readFileSync('comparison.md', 'utf8');
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: `## trajeval evaluation\n\n${body}`,
+          });
+
+    - name: Fail on regression
+      if: steps.compare.outputs.regressed == 'true'
+      shell: bash
+      run: |
+        echo "One or more metrics regressed beyond their configured threshold."
+        exit 1

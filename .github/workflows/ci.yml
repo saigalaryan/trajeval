@@ -1,0 +1,56 @@
+name: CI
+
+# Enforces on every push/PR what the whole trajeval session was built
+# against locally: strict types, clean lint, passing tests for the Python
+# package, and lint/typecheck/build for the web viewer. Distinct from
+# trajeval.yml (an *example* workflow for consumers using trajeval to
+# evaluate their own agent) and publish.yml (release-only, PyPI).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/trajeval
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.11"
+
+      - run: uv sync --all-extras
+      - run: uv run ruff format --check .
+      - run: uv run ruff check .
+      - run: uv run mypy --strict src/trajeval
+      - run: uv run pytest --cov=trajeval --cov-report=term-missing
+
+      # A docs build failure (broken mkdocstrings reference, bad snippet
+      # path) is a real bug in the docs, not just cosmetic — catch it here
+      # rather than the first time someone tries to build the site.
+      - run: uv run mkdocs build --strict
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run build

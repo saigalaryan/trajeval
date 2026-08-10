@@ -1,0 +1,12 @@
+# Normalize line endings to LF in the repo regardless of platform — this is
+# a cross-platform project (Python + Node tooling) developed partly on
+# Windows; without this, git's per-OS autocrlf behavior makes every file
+# show as modified the first time someone on a different platform touches it.
+* text=auto eol=lf
+
+# Binary/generated — never text-convert these.
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary

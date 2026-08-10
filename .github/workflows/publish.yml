@@ -1,0 +1,82 @@
+name: Publish trajeval to PyPI
+
+# Trusted publishing (OIDC) — no PyPI API token stored as a secret. This
+# requires a one-time setup on PyPI's side that this file can't do for you:
+# on pypi.org, go to the trajeval project -> Publishing -> add a trusted
+# publisher for this repo, workflow file "publish.yml", environment "pypi".
+# (For a brand-new project name, PyPI also supports registering a trusted
+# publisher before the first release exists at all — see "pending publishers"
+# in PyPI's docs.) Until that's configured, this workflow will fail at the
+# publish step with an authorization error — it does not silently fall back
+# to anything.
+#
+# Triggers only on a published GitHub Release, never on every tag push, so
+# cutting a release is a deliberate, reviewable action (draft a release,
+# check the notes, then publish it) rather than something a stray `git push
+# --tags` can set off.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/trajeval
+    steps:
+      - uses: actions/checkout@v4
+
+      # The wheel bundles apps/web's static export as package data (see
+      # scripts/bundle_webapp.py) so `trajeval serve` works with zero Node
+      # dependency for installers — but Node IS needed here, to build it.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build and bundle the web viewer
+        working-directory: .
+        run: python scripts/bundle_webapp.py
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.11"
+
+      # Safety gate: never publish a build that doesn't pass its own tests.
+      - run: uv sync --all-extras
+      - run: uv run ruff format --check .
+      - run: uv run ruff check .
+      - run: uv run mypy --strict src/trajeval
+      - run: uv run pytest --cov=trajeval
+
+      - run: uv build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trajeval-dist
+          path: packages/trajeval/dist/
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/trajeval/
+    permissions:
+      # id-token: write is what makes this "trusted publishing" — PyPI
+      # verifies a short-lived OIDC token from this job instead of a
+      # long-lived secret.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: trajeval-dist
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/

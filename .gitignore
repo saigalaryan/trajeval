@@ -1,0 +1,29 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+htmlcov/
+.coverage
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Bundled web viewer static export — a build artifact, not source. Rebuild
+# it with `python scripts/bundle_webapp.py` before packaging a release; see
+# that script's docstring for why this isn't committed.
+packages/trajeval/src/trajeval/_webapp_dist/
+
+# judge response cache — plaintext prompts/responses, may contain whatever
+# was in the dataset's questions and retrieved chunks. Never commit it.
+.trajeval_judge_cache.json
+*.trajeval_judge_cache.json
+
+# mkdocs build output (`mkdocs build` / `mkdocs serve`'s local site dir)
+site/

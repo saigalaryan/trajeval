@@ -1,0 +1,51 @@
+name: trajeval evaluation
+
+# Example workflow wiring up the trajeval-eval composite action. Keeps a
+# baseline RunResult cached from main's last successful run, compares every
+# PR against it, and comments the diff. Adjust `config`/paths to your repo.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Restores the baseline saved by the most recent push to main (see
+      # the "Save baseline" step below). A PR from a fresh clone with no
+      # prior main-branch run simply misses the cache — that's the
+      # no-baseline case the action handles gracefully.
+      - name: Restore baseline
+        uses: actions/cache/restore@v4
+        with:
+          path: results/baseline.json
+          key: trajeval-baseline-${{ github.event.pull_request.base.sha || github.sha }}
+          restore-keys: trajeval-baseline-
+
+      - uses: ./.github/actions/trajeval-eval
+        with:
+          config: trajeval.yaml
+          baseline-path: results/baseline.json
+          out-path: results/candidate.json
+
+      # On main, the candidate this run just produced becomes tomorrow's
+      # baseline. Cache path must match the restore step's path exactly, so
+      # copy it into place before saving.
+      - name: Prepare baseline artifact
+        if: github.ref == 'refs/heads/main'
+        run: cp results/candidate.json results/baseline.json
+
+      - name: Save baseline
+        if: github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v4
+        with:
+          path: results/baseline.json
+          key: trajeval-baseline-${{ github.sha }}
