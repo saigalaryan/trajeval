@@ -80,8 +80,16 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
-      - run: npx tsc --noEmit
+      # `next build` must run before `tsc --noEmit`, not after: Next.js's
+      # typed-routes feature (LayoutProps<...> etc. in app/layout.tsx) is a
+      # generated global type that only exists once `.next/types/` has been
+      # produced by a build — running tsc first fails with "Cannot find
+      # name 'LayoutProps'" on a fresh checkout with no prior .next/
+      # directory lying around (which is exactly what a real CI runner is,
+      # and what a local dev machine that's already run `next build` once
+      # isn't — this bit CI without ever failing locally).
       - run: npm run build
+      - run: npx tsc --noEmit
 
   # Every other job in this file runs against an editable/dev install from
   # the source tree — none of them prove the thing an end user actually
@@ -99,6 +107,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Install web viewer dependencies
+        working-directory: apps/web
+        run: npm ci
       - name: Build and bundle the web viewer
         run: python scripts/bundle_webapp.py
 

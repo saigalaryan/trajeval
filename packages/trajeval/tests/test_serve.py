@@ -31,13 +31,26 @@ def test_translate_path_root_serves_index_html(tmp_path: Path) -> None:
 
 
 def test_translate_path_clean_url_maps_to_html_file(tmp_path: Path, monkeypatch) -> None:
-    """Next.js static export's clean-URL routing: /run -> run.html — but
-    only when run.html actually exists in the bundled dist."""
+    """Next.js static export's clean-URL routing: /run -> run.html — and
+    specifically must resolve to the .html file even when a same-named
+    *directory* also exists (the App Router's static export emits both a
+    run.html file and a run/ directory of RSC payload chunks for the same
+    route — this is the exact shape that broke translate_path before it
+    checked is_file() instead of exists()).
+
+    Builds its own fixture dist rather than depending on the real bundled
+    _webapp_dist, which only exists locally after running
+    scripts/bundle_webapp.py — never true on a fresh CI checkout.
+    """
+    fake_dist = tmp_path / "webapp_dist"
+    fake_dist.mkdir()
+    (fake_dist / "run.html").write_text("<html></html>", encoding="utf-8")
+    (fake_dist / "run").mkdir()
+    monkeypatch.setattr("trajeval.serve._WEBAPP_DIST", fake_dist)
+
     handler = _handler_for(tmp_path)
-    # Use a page that's actually present in the real bundled dist so this
-    # doesn't depend on a fake fixture tree.
     result = handler.translate_path("/run")
-    assert result == str(_WEBAPP_DIST / "run.html")
+    assert result == str(fake_dist / "run.html")
 
 
 def test_translate_path_static_asset_passes_through_unchanged(tmp_path: Path) -> None:
@@ -85,7 +98,15 @@ def test_translate_path_degenerate_unknown_clean_url_falls_through(tmp_path: Pat
 # ---------------------------------------------------------------------------
 
 
-def test_serve_degenerate_missing_results_dir_raises(tmp_path: Path) -> None:
+def test_serve_degenerate_missing_results_dir_raises(tmp_path: Path, monkeypatch) -> None:
+    # Needs a bundled-viewer fixture so serve() gets past its "is the
+    # viewer bundled" check and actually reaches the results_dir check
+    # this test is about — see test_serve_raises_viewer_not_bundled_when_dist_missing
+    # for the inverse case.
+    fake_dist = tmp_path / "webapp_dist"
+    fake_dist.mkdir()
+    monkeypatch.setattr("trajeval.serve._WEBAPP_DIST", fake_dist)
+
     with pytest.raises(FileNotFoundError):
         serve(tmp_path / "does-not-exist", port=0, open_browser=False)
 

@@ -47,6 +47,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Install web viewer dependencies
+        working-directory: apps/web
+        run: npm ci
       - name: Build and bundle the web viewer
         working-directory: .
         run: python scripts/bundle_webapp.py
