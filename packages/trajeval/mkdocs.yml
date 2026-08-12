@@ -1,8 +1,8 @@
 site_name: trajeval
 site_description: Evaluation harness for agentic RAG systems — scores the trajectory, not just the answer.
-site_url: https://saigalaryan03.github.io/trajeval/
+site_url: https://saigalaryan.github.io/trajeval/
 repo_name: trajeval
-repo_url: https://github.com/saigalaryan03/trajeval
+repo_url: https://github.com/saigalaryan/trajeval
 edit_uri: edit/main/packages/trajeval/docs/
 docs_dir: docs
 

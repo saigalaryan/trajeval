@@ -1,10 +1,10 @@
 # trajeval
 
-[![CI](https://github.com/saigalaryan03/trajeval/actions/workflows/ci.yml/badge.svg)](https://github.com/saigalaryan03/trajeval/actions/workflows/ci.yml)
+[![CI](https://github.com/saigalaryan/trajeval/actions/workflows/ci.yml/badge.svg)](https://github.com/saigalaryan/trajeval/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/trajectory-eval.svg)](https://pypi.org/project/trajectory-eval/)
 [![Python versions](https://img.shields.io/pypi/pyversions/trajectory-eval.svg)](https://pypi.org/project/trajectory-eval/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/saigalaryan03/trajeval/blob/main/LICENSE)
-[![Docs](https://img.shields.io/badge/docs-mkdocs-blue.svg)](https://saigalaryan03.github.io/trajeval/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/saigalaryan/trajeval/blob/main/LICENSE)
+[![Docs](https://img.shields.io/badge/docs-mkdocs-blue.svg)](https://saigalaryan.github.io/trajeval/)
 
 An evaluation harness for **agentic RAG systems** — retrieval systems where an
 LLM agent decides when to search, what to search for, whether to search

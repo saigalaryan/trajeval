@@ -9,7 +9,7 @@ readme = "README.md"
 license = { text = "MIT" }
 # Best-guess display name from the GitHub handle this project is published
 # under — edit to your preferred name if this isn't it.
-authors = [{ name = "saigalaryan03", email = "saigalaryan03@gmail.com" }]
+authors = [{ name = "saigalaryan", email = "saigalaryan03@gmail.com" }]
 requires-python = ">=3.11"
 keywords = [
     "evaluation",
@@ -38,11 +38,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/saigalaryan03/trajeval"
-Repository = "https://github.com/saigalaryan03/trajeval"
-Documentation = "https://saigalaryan03.github.io/trajeval/"
-"Bug Tracker" = "https://github.com/saigalaryan03/trajeval/issues"
-Changelog = "https://github.com/saigalaryan03/trajeval/blob/main/packages/trajeval/CHANGELOG.md"
+Homepage = "https://github.com/saigalaryan/trajeval"
+Repository = "https://github.com/saigalaryan/trajeval"
+Documentation = "https://saigalaryan.github.io/trajeval/"
+"Bug Tracker" = "https://github.com/saigalaryan/trajeval/issues"
+Changelog = "https://github.com/saigalaryan/trajeval/blob/main/packages/trajeval/CHANGELOG.md"
 
 [project.optional-dependencies]
 judge = [

@@ -18,7 +18,7 @@ GitHub, since GitHub Pages can't be configured from a workflow file:
    the `gh-pages` branch.
 2. On GitHub: **Settings → Pages → Build and deployment → Source**: "Deploy
    from a branch". **Branch**: `gh-pages` / `/ (root)`. Save.
-3. The site is live at `https://saigalaryan03.github.io/trajeval/` within a
+3. The site is live at `https://saigalaryan.github.io/trajeval/` within a
    few minutes (matches `site_url` in `packages/trajeval/mkdocs.yml`).
 
 ## Web viewer (Vercel) — manual, one-time
@@ -30,7 +30,7 @@ and it requires either dashboard access or a Vercel API token this session
 doesn't have:
 
 1. On [vercel.com](https://vercel.com), **Add New → Project**, import the
-   `saigalaryan03/trajeval` GitHub repo.
+   `saigalaryan/trajeval` GitHub repo.
 2. In the import screen's **Root Directory** setting, set it to `apps/web`
    — this is the one setting that matters for a monorepo; without it,
    Vercel looks for `package.json` at the repo root and won't find the

@@ -262,7 +262,7 @@ def serve_command(
 
 
 _EXAMPLE_CONFIG = """\
-# trajeval config — see https://github.com/saigalaryan03/trajeval for the full reference.
+# trajeval config — see https://github.com/saigalaryan/trajeval for the full reference.
 adapter: my_agent:MyAdapter   # module.path:ClassName | :factory_fn | :instance
 dataset: datasets/seed/seed.jsonl
 judge_provider: anthropic     # anthropic | openai
