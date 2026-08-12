@@ -125,10 +125,13 @@ trajeval report  results/latest.json --html report.html
 A composite GitHub Action (`.github/actions/trajeval-eval`) runs an
 evaluation on every PR, compares it against a cached baseline from `main`,
 comments a markdown diff table, and fails the build on a configured
-regression. See `.github/workflows/trajeval.yml` for a complete example,
-including the no-baseline case (first run on a repo, or a PR with no cached
-baseline yet) — the action runs and uploads the candidate result either way,
-it just skips the comparison.
+regression. See `examples/trajeval-github-workflow.yml` for a complete
+example workflow wiring it up — copy it to `.github/workflows/trajeval.yml`
+in *your* repo (it deliberately doesn't live in trajeval's own
+`.github/workflows/`, since this repo has no `trajeval.yaml`/agent of its
+own for it to evaluate). Handles the no-baseline case (first run on a repo,
+or a PR with no cached baseline yet) — the action runs and uploads the
+candidate result either way, it just skips the comparison.
 
 ## Development
 

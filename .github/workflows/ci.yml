@@ -3,8 +3,9 @@ name: CI
 # Enforces on every push/PR what the whole trajeval session was built
 # against locally: strict types, clean lint, passing tests for the Python
 # package, and lint/typecheck/build for the web viewer. Distinct from
-# trajeval.yml (an *example* workflow for consumers using trajeval to
-# evaluate their own agent) and publish.yml (release-only, PyPI).
+# examples/trajeval-github-workflow.yml (a *template* for consumers using
+# trajeval to evaluate their own agent — not a live workflow in this repo)
+# and publish.yml (release-only, PyPI).
 
 on:
   push:

@@ -1,8 +1,22 @@
 name: trajeval evaluation
 
-# Example workflow wiring up the trajeval-eval composite action. Keeps a
-# baseline RunResult cached from main's last successful run, compares every
-# PR against it, and comments the diff. Adjust `config`/paths to your repo.
+# This is a TEMPLATE for repos *using* trajeval to evaluate their own agent
+# — copy it to `.github/workflows/trajeval.yml` in your own repo (adjusting
+# `config`/paths for your setup) and it'll run on every push/PR.
+#
+# It deliberately does NOT live in this repo's own .github/workflows/ —
+# GitHub auto-executes anything placed there, and this repo (trajeval
+# itself, the library) has no trajeval.yaml/agent of its own to evaluate.
+# A copy of it living in the live workflows/ directory here would fail on
+# every single push for that reason alone, which is exactly what happened
+# before this file was moved out — see git history if you're curious.
+#
+# Keeps a baseline RunResult cached from main's last successful run,
+# compares every PR against it, and comments the diff. Depends on the
+# composite action at .github/actions/trajeval-eval in *this* repo — if
+# you're copying this template elsewhere, you'll need that action too (or
+# reference it via `saigalaryan/trajeval/.github/actions/trajeval-eval@main`
+# instead of the local `./` path below).
 
 on:
   pull_request:
