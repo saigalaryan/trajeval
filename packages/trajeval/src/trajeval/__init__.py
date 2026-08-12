@@ -3,6 +3,18 @@
 Scores the trajectory an agent takes to an answer, not just the answer.
 """
 
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    # Reads from installed package metadata rather than duplicating the
+    # version string here and in pyproject.toml (those two would drift).
+    # Keyed on the PyPI *distribution* name ("trajectory-eval"), which is
+    # deliberately different from this importable module name — see
+    # pyproject.toml's [project] comment for why.
+    __version__ = version("trajectory-eval")
+except PackageNotFoundError:  # pragma: no cover - only when genuinely not installed at all
+    __version__ = "0.0.0+unknown"
+
 from trajeval.adapters import (
     AgentAdapter,
     CallableAdapter,
@@ -35,6 +47,7 @@ from trajeval.types import (
 
 __all__ = [
     "SCHEMA_VERSION",
+    "__version__",
     "AgentAdapter",
     "AnswerStep",
     "CalibrationState",

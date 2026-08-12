@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -12,7 +13,14 @@ from trajeval.judge.client import FakeJudgeClient
 from trajeval.metrics.recovery import RecoveryMetric
 from trajeval.metrics.retrieval_necessity import RetrievalNecessityMetric
 from trajeval.results import RunResult
-from trajeval.runner import load_golden_dataset, load_run_result, recalibrate, run, save_run_result
+from trajeval.runner import (
+    _git_sha,
+    load_golden_dataset,
+    load_run_result,
+    recalibrate,
+    run,
+    save_run_result,
+)
 from trajeval.types import GoldenRecord
 
 metric = RetrievalNecessityMetric()
@@ -82,8 +90,35 @@ def test_run_metadata_is_populated() -> None:
     assert result.metadata.dataset_path == "datasets/x.jsonl"
     assert result.metadata.metric_names == ["retrieval_necessity"]
     assert result.metadata.started_at <= result.metadata.finished_at
-    # not a git repo in this environment; must degrade to None, not raise
-    assert result.metadata.git_sha is None
+    # git_sha's actual value depends on whether the test suite happens to be
+    # running inside a git checkout — see the dedicated _git_sha() tests
+    # below for the real degrade-to-None-vs-real-SHA contract, tested
+    # independent of that ambient state.
+    assert result.metadata.git_sha is None or isinstance(result.metadata.git_sha, str)
+
+
+def test_git_sha_returns_the_sha_when_in_a_git_repo(monkeypatch) -> None:
+    def fake_run(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
+        return subprocess.CompletedProcess(args, 0, stdout="abc123\n", stderr="")
+
+    monkeypatch.setattr("trajeval.runner.subprocess.run", fake_run)
+    assert _git_sha() == "abc123"
+
+
+def test_git_sha_degrades_to_none_outside_a_git_repo(monkeypatch) -> None:
+    def fake_run(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
+        raise subprocess.CalledProcessError(128, args)
+
+    monkeypatch.setattr("trajeval.runner.subprocess.run", fake_run)
+    assert _git_sha() is None
+
+
+def test_git_sha_degrades_to_none_when_git_isnt_installed(monkeypatch) -> None:
+    def fake_run(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
+        raise FileNotFoundError("git not found")
+
+    monkeypatch.setattr("trajeval.runner.subprocess.run", fake_run)
+    assert _git_sha() is None
 
 
 # ---------------------------------------------------------------------------

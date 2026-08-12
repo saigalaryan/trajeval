@@ -1,0 +1,48 @@
+name: Deploy docs to GitHub Pages
+
+# mkdocs gh-deploy builds the site and force-pushes it to the gh-pages
+# branch of this same repo — GitHub Pages then serves straight from that
+# branch. One-time manual setup this file can't do for you: on GitHub,
+# Settings -> Pages -> Build and deployment -> Source: "Deploy from a
+# branch", Branch: "gh-pages" / "/ (root)". The gh-pages branch doesn't
+# exist until this workflow runs once.
+#
+# Only fires on push to main, and only when docs-relevant paths changed —
+# a code-only change shouldn't redeploy an unchanged docs site. Doesn't
+# gate on ci.yml passing first: mkdocs build --strict runs there on every
+# PR, so main is expected to already be docs-clean by the time this fires;
+# if it somehow isn't, this job just fails harmlessly (nothing gets
+# published) rather than serving broken docs.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/trajeval/docs/**"
+      - "packages/trajeval/mkdocs.yml"
+      - "packages/trajeval/README.md"
+      - ".github/workflows/docs.yml"
+
+permissions:
+  contents: write # mkdocs gh-deploy pushes to the gh-pages branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/trajeval
+    env:
+      UV_PYTHON: "3.11"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+
+      - run: uv sync --extra docs
+
+      - name: Configure git identity for gh-deploy's commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - run: uv run mkdocs gh-deploy --force

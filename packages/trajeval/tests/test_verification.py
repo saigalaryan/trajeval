@@ -14,11 +14,32 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
+import trajeval
 from trajeval.adapters import CallableAdapter
 from trajeval.metrics.retrieval_necessity import RetrievalNecessityMetric
 from trajeval.runner import load_golden_dataset, run
 
-SEED_DATASET = Path(__file__).parents[3] / "datasets" / "seed" / "seed.jsonl"
+# Prefer the repo-root copy (the canonical source, and what CI actually
+# exercises from a full checkout); fall back to the bundled package copy
+# (packages/trajeval/src/trajeval/_data/seed.jsonl, shipped for
+# `trajeval init --with-seed-dataset`) so this test still runs — rather
+# than crashing on a missing path — if it's ever executed from just an
+# unpacked sdist/wheel install without the rest of the monorepo around it.
+_REPO_ROOT_SEED = Path(__file__).parents[3] / "datasets" / "seed" / "seed.jsonl"
+_BUNDLED_SEED = Path(trajeval.__file__).parent / "_data" / "seed.jsonl"
+SEED_DATASET = _REPO_ROOT_SEED if _REPO_ROOT_SEED.exists() else _BUNDLED_SEED
+
+
+def test_bundled_seed_dataset_matches_repo_root_copy() -> None:
+    """The two copies (repo root, for repo-based workflows; bundled inside
+    the package, for `trajeval init --with-seed-dataset` after a plain pip
+    install) are expected to be identical — this is the tripwire that
+    fails loudly if one is ever updated without the other."""
+    if not _REPO_ROOT_SEED.exists():
+        pytest.skip("only meaningful from a full monorepo checkout")
+    assert _BUNDLED_SEED.read_text(encoding="utf-8") == _REPO_ROOT_SEED.read_text(encoding="utf-8")
 
 
 def _always_retrieve_agent(question: str) -> dict:

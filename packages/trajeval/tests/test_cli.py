@@ -83,6 +83,38 @@ def test_init_skips_existing_files(tmp_path: Path) -> None:
     assert (tmp_path / "trajeval.yaml").read_text(encoding="utf-8") == "existing content"
 
 
+def test_init_without_seed_dataset_flag_does_not_write_one(tmp_path: Path) -> None:
+    result = runner.invoke(app, ["init", "--dir", str(tmp_path)])
+    assert result.exit_code == 0
+    assert not (tmp_path / "datasets" / "seed" / "seed.jsonl").exists()
+
+
+def test_init_with_seed_dataset_writes_a_usable_dataset(tmp_path: Path) -> None:
+    result = runner.invoke(app, ["init", "--dir", str(tmp_path), "--with-seed-dataset"])
+    assert result.exit_code == 0
+    dataset_path = tmp_path / "datasets" / "seed" / "seed.jsonl"
+    assert dataset_path.exists()
+
+    # Round-trips through validate_dataset cleanly — proves it's not just a
+    # file that exists, but one trajeval run/validate can actually use.
+    from trajeval.dataset_validation import validate_dataset
+
+    report = validate_dataset(dataset_path)
+    assert report.ok
+    assert report.num_records > 0
+
+
+def test_init_with_seed_dataset_skips_existing_file(tmp_path: Path) -> None:
+    dataset_path = tmp_path / "datasets" / "seed" / "seed.jsonl"
+    dataset_path.parent.mkdir(parents=True)
+    dataset_path.write_text("existing content", encoding="utf-8")
+
+    result = runner.invoke(app, ["init", "--dir", str(tmp_path), "--with-seed-dataset"])
+
+    assert result.exit_code == 0
+    assert dataset_path.read_text(encoding="utf-8") == "existing content"
+
+
 def test_validate_end_to_end_clean_dataset(tmp_path: Path) -> None:
     dataset = tmp_path / "dataset.jsonl"
     _write_dataset(dataset)
@@ -308,3 +340,11 @@ def test_no_args_shows_help() -> None:
     assert "label" in result.output
     assert "report" in result.output
     assert "init" in result.output
+
+
+def test_version_flag() -> None:
+    from trajeval import __version__
+
+    result = runner.invoke(app, ["--version"])
+    assert result.exit_code == 0
+    assert __version__ in result.output

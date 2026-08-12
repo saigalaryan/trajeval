@@ -15,27 +15,55 @@ permissions:
   contents: read
 
 jobs:
-  python:
+  # Format/lint/type/docs checks run once on 3.11 (the floor of
+  # requires-python and this project's target-version for both ruff and
+  # mypy) — these don't meaningfully vary by interpreter version, so
+  # running them 3x would just be slower CI for no extra signal.
+  lint:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: packages/trajeval
+    env:
+      # astral-sh/setup-uv installs the `uv` tool itself, not a Python
+      # interpreter — it has no python-version input. UV_PYTHON is what
+      # tells `uv sync`/`uv run` which interpreter to use; uv downloads it
+      # itself if it isn't already present on the runner.
+      UV_PYTHON: "3.11"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
-        with:
-          python-version: "3.11"
 
       - run: uv sync --all-extras
       - run: uv run ruff format --check .
       - run: uv run ruff check .
       - run: uv run mypy --strict src/trajeval
-      - run: uv run pytest --cov=trajeval --cov-report=term-missing
 
       # A docs build failure (broken mkdocstrings reference, bad snippet
       # path) is a real bug in the docs, not just cosmetic — catch it here
       # rather than the first time someone tries to build the site.
       - run: uv run mkdocs build --strict
+
+  # requires-python in pyproject.toml promises >=3.11 — actually run the
+  # test suite on each minor version in that range, not just the one this
+  # was developed against.
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/trajeval
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+
+      - run: uv sync --all-extras
+      - run: uv run pytest --cov=trajeval --cov-report=term-missing
 
   web:
     runs-on: ubuntu-latest
@@ -54,3 +82,48 @@ jobs:
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm run build
+
+  # Every other job in this file runs against an editable/dev install from
+  # the source tree — none of them prove the thing an end user actually
+  # does (`pip install trajectory-eval`) works. This builds the real wheel,
+  # installs it into a throwaway venv with nothing else on the path, and
+  # checks the CLI runs and the bundled viewer + py.typed + seed dataset
+  # actually made it into the install — the same properties publish.yml's
+  # wheel-content check verifies structurally, checked here behaviorally.
+  install-smoke-test:
+    runs-on: ubuntu-latest
+    env:
+      UV_PYTHON: "3.11"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build and bundle the web viewer
+        run: python scripts/bundle_webapp.py
+
+      - uses: astral-sh/setup-uv@v3
+      - name: Build the wheel
+        working-directory: packages/trajeval
+        run: uv build
+
+      - name: Install into a clean venv (no dev/editable install involved)
+        run: |
+          WHEEL=$(ls packages/trajeval/dist/*.whl)
+          python -m venv /tmp/smoke-venv
+          /tmp/smoke-venv/bin/pip install "${WHEEL}[cli]"
+
+      - name: Smoke test the installed CLI and bundled package data
+        run: |
+          /tmp/smoke-venv/bin/trajeval --version
+          /tmp/smoke-venv/bin/python -c "
+          import pathlib
+          import trajeval
+          pkg_dir = pathlib.Path(trajeval.__file__).parent
+          assert (pkg_dir / 'py.typed').exists(), 'py.typed missing from installed package'
+          webapp = pkg_dir / '_webapp_dist'
+          assert webapp.exists() and any(webapp.iterdir()), 'bundled web viewer missing after install'
+          seed = pkg_dir / '_data' / 'seed.jsonl'
+          assert seed.exists() and seed.stat().st_size > 0, 'bundled seed dataset missing after install'
+          print('OK: py.typed, bundled viewer, and seed dataset all present after a clean install')
+          "

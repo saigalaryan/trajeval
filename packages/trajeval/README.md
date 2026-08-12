@@ -1,5 +1,11 @@
 # trajeval
 
+[![CI](https://github.com/saigalaryan03/trajeval/actions/workflows/ci.yml/badge.svg)](https://github.com/saigalaryan03/trajeval/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/trajectory-eval.svg)](https://pypi.org/project/trajectory-eval/)
+[![Python versions](https://img.shields.io/pypi/pyversions/trajectory-eval.svg)](https://pypi.org/project/trajectory-eval/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/saigalaryan03/trajeval/blob/main/LICENSE)
+[![Docs](https://img.shields.io/badge/docs-mkdocs-blue.svg)](https://saigalaryan03.github.io/trajeval/)
+
 An evaluation harness for **agentic RAG systems** — retrieval systems where an
 LLM agent decides when to search, what to search for, whether to search
 again, and when it has enough to answer.
@@ -17,19 +23,17 @@ MIT licensed.
 ## Quickstart (5 minutes)
 
 ```bash
-# 1. Install (editable install from this repo until it's on PyPI)
-pip install -e "packages/trajeval[cli]"
+# 1. Install
+pip install "trajectory-eval[cli]"
 
-# 2. Scaffold a config and an example adapter into your project
-trajeval init
+# 2. Scaffold a config, an example adapter, and a small example golden
+#    dataset (30 records) into your project — enough to try the pipeline
+#    end-to-end before writing your own dataset:
+trajeval init --with-seed-dataset
 
-# 3. Point trajeval at a golden dataset. The repo ships one to try immediately:
-mkdir -p datasets/seed
-cp path/to/trajeval/datasets/seed/seed.jsonl datasets/seed/seed.jsonl
-
-# 3b. Sanity-check the dataset before spending any time (or, with judged
-#     metrics, money) running against it — catches malformed lines, missing
-#     fields, and duplicate ids all at once:
+# 3. Sanity-check the dataset before spending any time (or, with judged
+#    metrics, money) running against it — catches malformed lines, missing
+#    fields, and duplicate ids all at once:
 trajeval validate datasets/seed/seed.jsonl
 
 # 4. Wire my_agent.py's MyAdapter up to your real agent, then run:
@@ -96,6 +100,16 @@ trajeval label --run results/latest.json --dataset datasets/seed/seed.jsonl \
   --metric recovery --n 50 --labels labels.jsonl
 ```
 
+**No judged metric ships pre-calibrated.** The calibration *machinery*
+(kappa computation, weighted kappa for ordinal metrics, per-tag slicing,
+the `is_calibrated`/`UNCALIBRATED` badge) is built and tested — but
+producing a real `CalibrationState` for `query_quality`, `recovery`, or
+`faithfulness` requires an actual person hand-labeling ~50 real
+trajectories, which hasn't been done for this repo's own example dataset.
+Every judged metric you run today will show `UNCALIBRATED` until you (or
+your team) run `trajeval label` yourselves against your own judge model and
+dataset. Don't trust a judged score you haven't personally calibrated.
+
 ## CLI
 
 ```
@@ -128,6 +142,17 @@ pytest --cov=trajeval
 ## Status
 
 Phases 1–3 of the project (core schema, all seven metrics, judge
-calibration, CLI, CI integration, packaging) are built and tested. Phase 4
-(the web viewer under `apps/web`, and a public multi-architecture benchmark)
-is next — see the repo root for details.
+calibration, CLI, CI integration, packaging) are built and tested, along
+with the web viewer under `apps/web`. Two things remain open, both
+deliberately not faked to look further along than they are:
+
+- **No metric has real calibration data yet** — see "Judge calibration"
+  above. This needs an actual person labeling trajectories, which is real
+  work this repo hasn't had done to it.
+- **No public reference benchmark exists** — a small (10–20 record),
+  honestly-scored benchmark run against a real model, published alongside
+  the repo. This needs real Anthropic/OpenAI API spend to produce, which
+  hasn't been authorized/run yet.
+
+Both are tracked, not silently dropped — if you're picking this project up
+and want to close either gap, they're the two highest-value next steps.

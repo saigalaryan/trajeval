@@ -1,14 +1,19 @@
-name: Publish trajeval to PyPI
+name: Publish trajectory-eval to PyPI
 
 # Trusted publishing (OIDC) — no PyPI API token stored as a secret. This
 # requires a one-time setup on PyPI's side that this file can't do for you:
-# on pypi.org, go to the trajeval project -> Publishing -> add a trusted
-# publisher for this repo, workflow file "publish.yml", environment "pypi".
-# (For a brand-new project name, PyPI also supports registering a trusted
-# publisher before the first release exists at all — see "pending publishers"
-# in PyPI's docs.) Until that's configured, this workflow will fail at the
-# publish step with an authorization error — it does not silently fall back
-# to anything.
+# on pypi.org, go to the trajectory-eval project -> Publishing -> add a
+# trusted publisher for this repo, workflow file "publish.yml", environment
+# "pypi". (For a brand-new project name, PyPI also supports registering a
+# trusted publisher before the first release exists at all — see "pending
+# publishers" in PyPI's docs.) Until that's configured, this workflow will
+# fail at the publish step with an authorization error — it does not
+# silently fall back to anything.
+#
+# Note the PyPI *distribution* name is "trajectory-eval" (the plain name
+# "trajeval" was already taken by an unrelated package) — the import
+# (`import trajeval`) and the CLI command (`trajeval ...`) are unaffected,
+# see pyproject.toml's [project] comment.
 #
 # Triggers only on a published GitHub Release, never on every tag push, so
 # cutting a release is a deliberate, reviewable action (draft a release,
@@ -28,6 +33,11 @@ jobs:
     defaults:
       run:
         working-directory: packages/trajeval
+    env:
+      # astral-sh/setup-uv installs the `uv` tool itself, not a Python
+      # interpreter — it has no python-version input. UV_PYTHON is what
+      # tells `uv sync`/`uv run` which interpreter to use.
+      UV_PYTHON: "3.11"
     steps:
       - uses: actions/checkout@v4
 
@@ -42,8 +52,6 @@ jobs:
         run: python scripts/bundle_webapp.py
 
       - uses: astral-sh/setup-uv@v3
-        with:
-          python-version: "3.11"
 
       # Safety gate: never publish a build that doesn't pass its own tests.
       - run: uv sync --all-extras
@@ -53,6 +61,25 @@ jobs:
       - run: uv run pytest --cov=trajeval
 
       - run: uv build
+
+      # Hard release-integrity check: a silent `npm run build` failure
+      # inside scripts/bundle_webapp.py earlier in this job would otherwise
+      # ship a wheel where `trajeval serve` raises ViewerNotBundledError for
+      # every single installer, and py.typed missing would silently drop
+      # this package's PEP 561 typing support. Both would only be noticed
+      # after publishing — catch them here instead.
+      - name: Verify the wheel actually contains the bundled viewer and py.typed
+        run: |
+          python -c "
+          import pathlib, zipfile
+          wheels = sorted(pathlib.Path('dist').glob('*.whl'))
+          assert wheels, 'no wheel built'
+          names = zipfile.ZipFile(wheels[-1]).namelist()
+          webapp_files = [n for n in names if '_webapp_dist' in n]
+          assert len(webapp_files) > 10, f'bundled web viewer missing or too small: {len(webapp_files)} files'
+          assert any(n.endswith('py.typed') for n in names), 'py.typed marker missing from wheel'
+          print(f'OK: {len(names)} files in wheel, {len(webapp_files)} from the bundled viewer')
+          "
 
       - uses: actions/upload-artifact@v4
         with:
@@ -65,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/trajeval/
+      url: https://pypi.org/project/trajectory-eval/
     permissions:
       # id-token: write is what makes this "trusted publishing" — PyPI
       # verifies a short-lived OIDC token from this job instead of a

@@ -1,0 +1,26 @@
+version: 2
+updates:
+  # packages/trajeval's Python dependencies. Dependabot's "pip" ecosystem
+  # covers PEP 621 pyproject.toml projects generally (not just literal pip)
+  # — as of this writing Dependabot has no dedicated "uv" ecosystem value,
+  # so this is the correct choice, not a downgrade. Re-check GitHub's docs
+  # if this ever starts silently not opening PRs.
+  - package-ecosystem: "pip"
+    directory: "/packages/trajeval"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  # apps/web's npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  # The GitHub Actions themselves (actions/checkout, astral-sh/setup-uv, etc.)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5

@@ -1,11 +1,15 @@
 site_name: trajeval
 site_description: Evaluation harness for agentic RAG systems — scores the trajectory, not just the answer.
+site_url: https://saigalaryan03.github.io/trajeval/
 repo_name: trajeval
+repo_url: https://github.com/saigalaryan03/trajeval
+edit_uri: edit/main/packages/trajeval/docs/
 docs_dir: docs
 
-# No deploy target configured here on purpose — `mkdocs build` is verified
-# locally/in CI as a docs-don't-bitrot check, but publishing (GitHub Pages
-# or otherwise) is a separate decision this file doesn't make for you.
+# Deployed via .github/workflows/docs.yml (mkdocs gh-deploy, on push to
+# main after CI passes) to GitHub Pages. `mkdocs build --strict` in
+# ci.yml stays as the correctness check that runs on every PR too — the
+# deploy workflow only ever runs from main.
 
 theme:
   name: material

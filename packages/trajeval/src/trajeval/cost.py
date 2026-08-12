@@ -8,9 +8,9 @@ just the metric's name and the resulting breakdown lines up with
 `RunResult.aggregate_scores`.
 
 Pricing is a local table, not fetched live — treat `cost_usd` as an
-estimate, and expect to update the table when Anthropic's pricing changes.
-An unrecognized model records tokens correctly but flags cost as unknown
-rather than silently reporting $0.
+estimate, and expect to update the table when Anthropic's or OpenAI's
+pricing changes. An unrecognized model records tokens correctly but flags
+cost as unknown rather than silently reporting $0.
 """
 
 from __future__ import annotations
@@ -27,10 +27,12 @@ PRICING_PER_MILLION_TOKENS: dict[str, tuple[float, float]] = {
     "claude-sonnet-5": (3.00, 15.00),
     "claude-sonnet-4-6": (3.00, 15.00),
     "claude-haiku-4-5": (1.00, 5.00),
-    # OpenAI, for OpenAIJudgeClient. Lower confidence than the Anthropic
-    # rows above — verify against platform.openai.com/pricing before
-    # relying on this for anything beyond a rough estimate.
-    "gpt-5": (5.00, 15.00),
+    # OpenAI, for OpenAIJudgeClient. Verified against
+    # developers.openai.com/api/docs/pricing (standard tier, short
+    # context) — re-check there if these ever look stale; OpenAI, like
+    # Anthropic, doesn't publish pricing anywhere this table can fetch
+    # live from.
+    "gpt-5": (1.25, 10.00),
     "gpt-5-mini": (0.25, 2.00),
     "gpt-4o": (2.50, 10.00),
     "gpt-4o-mini": (0.15, 0.60),

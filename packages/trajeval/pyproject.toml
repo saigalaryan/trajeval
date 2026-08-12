@@ -1,13 +1,48 @@
 [project]
-name = "trajeval"
+# PyPI distribution name only — "trajeval" itself was already taken by an
+# unrelated package. The import (`import trajeval`) and the CLI command
+# (`trajeval ...`) are unaffected; only `pip install <name>` changes.
+name = "trajectory-eval"
 version = "0.1.0"
 description = "Evaluation harness for agentic RAG systems: scores the trajectory, not just the final answer."
 readme = "README.md"
 license = { text = "MIT" }
+# Best-guess display name from the GitHub handle this project is published
+# under — edit to your preferred name if this isn't it.
+authors = [{ name = "saigalaryan03", email = "saigalaryan03@gmail.com" }]
 requires-python = ">=3.11"
+keywords = [
+    "evaluation",
+    "agents",
+    "rag",
+    "llm",
+    "retrieval-augmented-generation",
+    "agentic",
+    "llm-eval",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
 dependencies = [
     "pydantic>=2.6",
 ]
+
+[project.urls]
+Homepage = "https://github.com/saigalaryan03/trajeval"
+Repository = "https://github.com/saigalaryan03/trajeval"
+Documentation = "https://saigalaryan03.github.io/trajeval/"
+"Bug Tracker" = "https://github.com/saigalaryan03/trajeval/issues"
+Changelog = "https://github.com/saigalaryan03/trajeval/blob/main/packages/trajeval/CHANGELOG.md"
 
 [project.optional-dependencies]
 judge = [

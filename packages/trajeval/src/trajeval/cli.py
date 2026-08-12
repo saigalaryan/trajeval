@@ -13,6 +13,7 @@ from pathlib import Path
 import typer
 from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
 
+from trajeval import __version__
 from trajeval import config as config_module
 from trajeval import runner as runner_module
 from trajeval.calibration.cli import run_labeling_session
@@ -30,6 +31,25 @@ app = typer.Typer(
     help="Evaluation harness for agentic RAG systems: scores the trajectory, not just the answer.",
     no_args_is_help=True,
 )
+
+
+def _version_callback(value: bool) -> None:
+    if value:
+        typer.echo(f"trajeval {__version__}")
+        raise typer.Exit()
+
+
+@app.callback()
+def main_callback(
+    version: bool = typer.Option(
+        False,
+        "--version",
+        callback=_version_callback,
+        is_eager=True,
+        help="Show trajeval's version and exit.",
+    ),
+) -> None:
+    pass
 
 
 def _calibration_badge(metric_name: str, cal: CalibrationState | None) -> str:
@@ -242,7 +262,7 @@ def serve_command(
 
 
 _EXAMPLE_CONFIG = """\
-# trajeval config — see https://github.com/ (project link) for the full reference.
+# trajeval config — see https://github.com/saigalaryan03/trajeval for the full reference.
 adapter: my_agent:MyAdapter   # module.path:ClassName | :factory_fn | :instance
 dataset: datasets/seed/seed.jsonl
 judge_provider: anthropic     # anthropic | openai
@@ -285,9 +305,17 @@ MyAdapter = CallableAdapter(_my_agent)
 '''
 
 
+_SEED_DATASET = Path(__file__).parent / "_data" / "seed.jsonl"
+
+
 @app.command("init")
 def init_command(
     directory: Path = typer.Option(Path("."), "--dir", help="Directory to scaffold into"),
+    with_seed_dataset: bool = typer.Option(
+        False,
+        "--with-seed-dataset",
+        help="Also copy trajeval's bundled example golden dataset to datasets/seed/seed.jsonl",
+    ),
 ) -> None:
     """Scaffold a trajeval.yaml config and an example adapter."""
     directory.mkdir(parents=True, exist_ok=True)
@@ -300,6 +328,15 @@ def init_command(
             continue
         path.write_text(content, encoding="utf-8")
         typer.echo(f"Wrote {path}")
+
+    if with_seed_dataset:
+        dataset_path = directory / "datasets" / "seed" / "seed.jsonl"
+        if dataset_path.exists():
+            typer.echo(f"Skipped {dataset_path} (already exists)")
+        else:
+            dataset_path.parent.mkdir(parents=True, exist_ok=True)
+            dataset_path.write_text(_SEED_DATASET.read_text(encoding="utf-8"), encoding="utf-8")
+            typer.echo(f"Wrote {dataset_path}")
 
     typer.echo(
         "\nNext: edit my_agent.py to call your real agent, then run "
