@@ -44,7 +44,7 @@ jobs:
       # The wheel bundles apps/web's static export as package data (see
       # scripts/bundle_webapp.py) so `trajeval serve` works with zero Node
       # dependency for installers — but Node IS needed here, to build it.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
       - name: Install web viewer dependencies
