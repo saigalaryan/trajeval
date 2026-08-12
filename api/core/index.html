@@ -1,0 +1,2964 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Evaluation harness for agentic RAG systems — scores the trajectory, not just the answer.">
+      
+      
+      
+        <link rel="canonical" href="https://saigalaryan.github.io/trajeval/api/core/">
+      
+      
+        <link rel="prev" href="../..">
+      
+      
+        <link rel="next" href="../metrics/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Core (run, results, types) - trajeval</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#core-running-results-types" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="trajeval" class="md-header__button md-logo" aria-label="trajeval" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            trajeval
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Core (run, results, types)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/saigalaryan/trajeval" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    trajeval
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="trajeval" class="md-nav__button md-logo" aria-label="trajeval" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    trajeval
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/saigalaryan/trajeval" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    trajeval
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core (run, results, types)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core (run, results, types)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-an-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running an evaluation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.runner.run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        run
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.runner.load_golden_dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        load_golden_dataset
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.runner.load_run_result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        load_run_result
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.runner.save_run_result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        save_run_result
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.runner.recalibrate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        recalibrate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adapters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.adapters.AgentAdapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AgentAdapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.adapters.CallableAdapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CallableAdapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.adapters.OpenAIToolCallAdapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenAIToolCallAdapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.adapters.TrajectoryRecorder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TrajectoryRecorder
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.adapters.parse_openai_messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parse_openai_messages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#results-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results schema
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.results.RunResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RunResult
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.results.RunMetadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RunMetadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.results.TrajectoryResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TrajectoryResult
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.results.CalibrationState" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CalibrationState
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajectorystep-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trajectory/step types
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.Trajectory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trajectory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.TrajectoryMetadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TrajectoryMetadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.GoldenRecord" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GoldenRecord
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.Step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.ThoughtStep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ThoughtStep
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.RetrievalStep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RetrievalStep
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.ToolStep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ToolStep
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.AnswerStep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AnswerStep
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.RetrievedChunk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RetrievedChunk
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cost-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost tracking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.cost.CostTracker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CostTracker
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.cost.estimate_cost_usd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        estimate_cost_usd
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../judge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Judge clients
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../calibration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Calibration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reporting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compare, report, serve
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-an-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running an evaluation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.runner.run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        run
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.runner.load_golden_dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        load_golden_dataset
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.runner.load_run_result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        load_run_result
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.runner.save_run_result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        save_run_result
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.runner.recalibrate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        recalibrate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adapters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.adapters.AgentAdapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AgentAdapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.adapters.CallableAdapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CallableAdapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.adapters.OpenAIToolCallAdapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenAIToolCallAdapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.adapters.TrajectoryRecorder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TrajectoryRecorder
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.adapters.parse_openai_messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parse_openai_messages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#results-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results schema
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.results.RunResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RunResult
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.results.RunMetadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RunMetadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.results.TrajectoryResult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TrajectoryResult
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.results.CalibrationState" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CalibrationState
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajectorystep-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trajectory/step types
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.Trajectory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trajectory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.TrajectoryMetadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TrajectoryMetadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.GoldenRecord" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GoldenRecord
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.Step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.ThoughtStep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ThoughtStep
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.RetrievalStep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RetrievalStep
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.ToolStep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ToolStep
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.AnswerStep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AnswerStep
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.types.RetrievedChunk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RetrievedChunk
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cost-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost tracking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.cost.CostTracker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CostTracker
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajeval.cost.estimate_cost_usd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        estimate_cost_usd
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="core-running-results-types">Core: running, results, types<a class="headerlink" href="#core-running-results-types" title="Permanent link">&para;</a></h1>
+<h2 id="running-an-evaluation">Running an evaluation<a class="headerlink" href="#running-an-evaluation" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="trajeval.runner.run" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">trajeval</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">adapter</span><span class="p">,</span> <span class="n">golden_records</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">concurrency</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">adapter_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataset_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">labels_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">on_progress</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#trajeval.runner.run" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Run <code>adapter</code> over every golden record, score with every metric.</p>
+<p>A record whose <code>adapter.run()</code> call raises is recorded with its error
+message and excluded from scoring and from every metric's aggregate,
+rather than aborting the whole run — see RunMetadata.num_errors.</p>
+<p>A record whose <em>trajectory</em> is produced fine but whose scoring raises
+for one particular metric (most commonly a judged metric hitting an
+unparseable model response) is handled the same way, one level down:
+that one metric is excluded from its own aggregate for that trajectory
+— see TrajectoryResult.metric_errors — while every other metric's score
+on that trajectory, and every other trajectory entirely, is unaffected.</p>
+<p>Every judged metric present in <code>metrics</code> (see
+<code>trajeval.calibration.labels.JUDGED_METRIC_NAMES</code>) gets a
+<code>CalibrationState</code> entry in the result, whether or not <code>labels_path</code> is
+given — with no labels, or too few, it's simply <code>is_calibrated=False</code>.
+This is deliberate: a judged metric's <code>RunResult</code> entry must never be
+silently missing a calibration state.</p>
+<p><code>on_progress(completed, total)</code>, if given, is called once per golden
+record as it finishes (adapter call + all metric scoring), in
+completion order — which, under a thread pool, is not dataset order.
+This module deliberately doesn't depend on any particular progress-bar
+library; <code>trajeval.cli</code> wires this to <code>rich</code> itself.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/trajeval/runner.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
+    <span class="n">adapter</span><span class="p">:</span> <span class="n">AgentAdapter</span><span class="p">,</span>
+    <span class="n">golden_records</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">GoldenRecord</span><span class="p">],</span>
+    <span class="n">metrics</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Metric</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">concurrency</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">adapter_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dataset_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">labels_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">on_progress</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RunResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run `adapter` over every golden record, score with every metric.</span>
+
+<span class="sd">    A record whose `adapter.run()` call raises is recorded with its error</span>
+<span class="sd">    message and excluded from scoring and from every metric&#39;s aggregate,</span>
+<span class="sd">    rather than aborting the whole run — see RunMetadata.num_errors.</span>
+
+<span class="sd">    A record whose *trajectory* is produced fine but whose scoring raises</span>
+<span class="sd">    for one particular metric (most commonly a judged metric hitting an</span>
+<span class="sd">    unparseable model response) is handled the same way, one level down:</span>
+<span class="sd">    that one metric is excluded from its own aggregate for that trajectory</span>
+<span class="sd">    — see TrajectoryResult.metric_errors — while every other metric&#39;s score</span>
+<span class="sd">    on that trajectory, and every other trajectory entirely, is unaffected.</span>
+
+<span class="sd">    Every judged metric present in `metrics` (see</span>
+<span class="sd">    `trajeval.calibration.labels.JUDGED_METRIC_NAMES`) gets a</span>
+<span class="sd">    `CalibrationState` entry in the result, whether or not `labels_path` is</span>
+<span class="sd">    given — with no labels, or too few, it&#39;s simply `is_calibrated=False`.</span>
+<span class="sd">    This is deliberate: a judged metric&#39;s `RunResult` entry must never be</span>
+<span class="sd">    silently missing a calibration state.</span>
+
+<span class="sd">    `on_progress(completed, total)`, if given, is called once per golden</span>
+<span class="sd">    record as it finishes (adapter call + all metric scoring), in</span>
+<span class="sd">    completion order — which, under a thread pool, is not dataset order.</span>
+<span class="sd">    This module deliberately doesn&#39;t depend on any particular progress-bar</span>
+<span class="sd">    library; `trajeval.cli` wires this to `rich` itself.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">golden_records</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ids</span><span class="p">)):</span>
+        <span class="n">dupes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">({</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ids</span> <span class="k">if</span> <span class="n">ids</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">})</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;golden_records contains duplicate ids: </span><span class="si">{</span><span class="n">dupes</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">started_at</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">UTC</span><span class="p">)</span>
+    <span class="n">resolved_adapter_name</span> <span class="o">=</span> <span class="n">adapter_name</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">adapter</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="n">errors</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">trajectories_by_golden</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Trajectory</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">metric_results_by_golden</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetricResult</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">metric_errors_by_golden</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">per_metric_results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">MetricResult</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="n">m</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">}</span>
+
+    <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">golden_records</span><span class="p">)</span>
+    <span class="n">completed</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">concurrency</span><span class="p">))</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">future_to_golden</span> <span class="o">=</span> <span class="p">{</span><span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">run</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">question</span><span class="p">):</span> <span class="n">g</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">golden_records</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">as_completed</span><span class="p">(</span><span class="n">future_to_golden</span><span class="p">):</span>
+            <span class="n">golden</span> <span class="o">=</span> <span class="n">future_to_golden</span><span class="p">[</span><span class="n">future</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">trajectory</span><span class="p">:</span> <span class="n">Trajectory</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - deliberately broad: any adapter failure is recorded, not fatal</span>
+                <span class="n">errors</span><span class="p">[</span><span class="n">golden</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">trajectory</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">trajectory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">trajectory</span><span class="o">.</span><span class="n">golden_id</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">golden_id</span> <span class="ow">or</span> <span class="n">golden</span><span class="o">.</span><span class="n">id</span>
+                <span class="n">trajectories_by_golden</span><span class="p">[</span><span class="n">golden</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">trajectory</span>
+                <span class="n">scores</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetricResult</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">metric_errors</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">result</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">golden</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - a judge/parsing failure on one metric</span>
+                        <span class="c1"># must not take down every other metric&#39;s result for this</span>
+                        <span class="c1"># trajectory, let alone the whole run — see TrajectoryResult.metric_errors.</span>
+                        <span class="n">metric_errors</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="k">continue</span>
+                    <span class="n">scores</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+                    <span class="n">per_metric_results</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="n">metric_results_by_golden</span><span class="p">[</span><span class="n">golden</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">scores</span>
+                <span class="k">if</span> <span class="n">metric_errors</span><span class="p">:</span>
+                    <span class="n">metric_errors_by_golden</span><span class="p">[</span><span class="n">golden</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_errors</span>
+
+            <span class="n">completed</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">on_progress</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">on_progress</span><span class="p">(</span><span class="n">completed</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+
+    <span class="n">trajectory_results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">golden</span> <span class="ow">in</span> <span class="n">golden_records</span><span class="p">:</span>
+        <span class="n">stored_trajectory</span> <span class="o">=</span> <span class="n">trajectories_by_golden</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">golden</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">trajectory_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">TrajectoryResult</span><span class="p">(</span>
+                <span class="n">golden_id</span><span class="o">=</span><span class="n">golden</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="n">question</span><span class="o">=</span><span class="n">golden</span><span class="o">.</span><span class="n">question</span><span class="p">,</span>
+                <span class="n">tags</span><span class="o">=</span><span class="n">golden</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span>
+                <span class="n">trajectory_id</span><span class="o">=</span><span class="n">stored_trajectory</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">stored_trajectory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">trajectory</span><span class="o">=</span><span class="n">stored_trajectory</span><span class="p">,</span>
+                <span class="n">metric_results</span><span class="o">=</span><span class="n">metric_results_by_golden</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">golden</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{}),</span>
+                <span class="n">error</span><span class="o">=</span><span class="n">errors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">golden</span><span class="o">.</span><span class="n">id</span><span class="p">),</span>
+                <span class="n">metric_errors</span><span class="o">=</span><span class="n">metric_errors_by_golden</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">golden</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">aggregate_scores</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">metric</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">per_metric_results</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">])</span> <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span>
+    <span class="p">}</span>
+
+    <span class="n">finished_at</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">UTC</span><span class="p">)</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">RunMetadata</span><span class="p">(</span>
+        <span class="n">run_id</span><span class="o">=</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">,</span>
+        <span class="n">started_at</span><span class="o">=</span><span class="n">started_at</span><span class="p">,</span>
+        <span class="n">finished_at</span><span class="o">=</span><span class="n">finished_at</span><span class="p">,</span>
+        <span class="n">git_sha</span><span class="o">=</span><span class="n">_git_sha</span><span class="p">(),</span>
+        <span class="n">config_hash</span><span class="o">=</span><span class="n">_config_hash</span><span class="p">(</span><span class="n">golden_records</span><span class="p">,</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">],</span> <span class="n">resolved_adapter_name</span><span class="p">),</span>
+        <span class="n">adapter_name</span><span class="o">=</span><span class="n">resolved_adapter_name</span><span class="p">,</span>
+        <span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
+        <span class="n">num_trajectories</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">golden_records</span><span class="p">),</span>
+        <span class="n">num_errors</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">),</span>
+        <span class="n">metric_names</span><span class="o">=</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">run_result</span> <span class="o">=</span> <span class="n">RunResult</span><span class="p">(</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+        <span class="n">trajectory_results</span><span class="o">=</span><span class="n">trajectory_results</span><span class="p">,</span>
+        <span class="n">aggregate_scores</span><span class="o">=</span><span class="n">aggregate_scores</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">judged_metric_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metrics</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">JUDGED_METRIC_NAMES</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">judged_metric_names</span><span class="p">:</span>
+        <span class="n">labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">HumanLabel</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_labels</span><span class="p">(</span><span class="n">labels_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">labels_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="n">run_result</span><span class="o">.</span><span class="n">calibration</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">metric_name</span><span class="p">:</span> <span class="n">compute_calibration</span><span class="p">(</span><span class="n">run_result</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">judged_metric_names</span>
+        <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">run_result</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="trajeval.runner.load_golden_dataset" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">trajeval</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">load_golden_dataset</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code>
+
+<a href="#trajeval.runner.load_golden_dataset" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Load a JSONL golden dataset: one GoldenRecord per non-blank line.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/trajeval/runner.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_golden_dataset</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">GoldenRecord</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a JSONL golden dataset: one GoldenRecord per non-blank line.&quot;&quot;&quot;</span>
+    <span class="n">records</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">GoldenRecord</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line_no</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GoldenRecord</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">line_no</span><span class="si">}</span><span class="s2">: invalid GoldenRecord JSON: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+    <span class="k">return</span> <span class="n">records</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="trajeval.runner.load_run_result" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">trajeval</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">load_run_result</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code>
+
+<a href="#trajeval.runner.load_run_result" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/trajeval/runner.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">240</span>
+<span class="normal">241</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_run_result</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RunResult</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">RunResult</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="trajeval.runner.save_run_result" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">trajeval</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">save_run_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></code>
+
+<a href="#trajeval.runner.save_run_result" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Write a RunResult to disk as pretty-printed JSON.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/trajeval/runner.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_run_result</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">RunResult</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write a RunResult to disk as pretty-printed JSON.&quot;&quot;&quot;</span>
+    <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="trajeval.runner.recalibrate" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">trajeval</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">recalibrate</span><span class="p">(</span><span class="n">run_result</span><span class="p">,</span> <span class="n">labels_path</span><span class="p">)</span></code>
+
+<a href="#trajeval.runner.recalibrate" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Recompute calibration state for a <em>previously saved</em> <code>RunResult</code>
+against a labels file, and return the updated copy.</p>
+<p>This — not <code>run(..., labels_path=...)</code> — is the realistic calibration
+workflow: <code>trajeval label</code> walks a human through trajectories from one
+specific saved run, so the labels it produces are only joinable against
+<em>that same run's</em> trajectory ids. Re-invoking <code>run()</code> calls the adapter
+again and gets fresh <code>uuid4()</code> trajectory ids that won't match any
+existing label — <code>run(..., labels_path=...)</code> only helps when the
+adapter itself assigns stable, reproducible trajectory ids.</p>
+<p>Deterministic and judged metric names both pass through this
+unmodified; only entries for judged metric names present in
+<code>run_result.metadata.metric_names</code> are (re)computed.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/trajeval/runner.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">recalibrate</span><span class="p">(</span><span class="n">run_result</span><span class="p">:</span> <span class="n">RunResult</span><span class="p">,</span> <span class="n">labels_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RunResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recompute calibration state for a *previously saved* `RunResult`</span>
+<span class="sd">    against a labels file, and return the updated copy.</span>
+
+<span class="sd">    This — not `run(..., labels_path=...)` — is the realistic calibration</span>
+<span class="sd">    workflow: `trajeval label` walks a human through trajectories from one</span>
+<span class="sd">    specific saved run, so the labels it produces are only joinable against</span>
+<span class="sd">    *that same run&#39;s* trajectory ids. Re-invoking `run()` calls the adapter</span>
+<span class="sd">    again and gets fresh `uuid4()` trajectory ids that won&#39;t match any</span>
+<span class="sd">    existing label — `run(..., labels_path=...)` only helps when the</span>
+<span class="sd">    adapter itself assigns stable, reproducible trajectory ids.</span>
+
+<span class="sd">    Deterministic and judged metric names both pass through this</span>
+<span class="sd">    unmodified; only entries for judged metric names present in</span>
+<span class="sd">    `run_result.metadata.metric_names` are (re)computed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">judged_metric_names</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">run_result</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">metric_names</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">JUDGED_METRIC_NAMES</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">judged_metric_names</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">run_result</span>
+
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">load_labels</span><span class="p">(</span><span class="n">labels_path</span><span class="p">)</span>
+    <span class="n">updated</span> <span class="o">=</span> <span class="n">run_result</span><span class="o">.</span><span class="n">model_copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">updated</span><span class="o">.</span><span class="n">calibration</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">metric_name</span><span class="p">:</span> <span class="n">compute_calibration</span><span class="p">(</span><span class="n">run_result</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">judged_metric_names</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">updated</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div><h2 id="adapters">Adapters<a class="headerlink" href="#adapters" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.adapters.AgentAdapter" class="doc doc-heading">
+            <code>trajeval.adapters.AgentAdapter</code>
+
+
+<a href="#trajeval.adapters.AgentAdapter" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="typing.Protocol">Protocol</span></code></p>
+
+
+
+        <p>Anything that can answer a question and return a Trajectory.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.adapters.CallableAdapter" class="doc doc-heading">
+              <code class="highlight language-python"><span class="n">trajeval</span><span class="o">.</span><span class="n">adapters</span><span class="o">.</span><span class="n">CallableAdapter</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span></code>
+
+<a href="#trajeval.adapters.CallableAdapter" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Wraps a function returning a trajectory-shaped dict.</p>
+<p><code>fn</code> receives the question and returns a mapping matching <code>Trajectory</code>'s
+fields (<code>final_answer</code>, <code>steps</code>, ...). <code>question</code> is filled in from the
+call if the mapping omits it, so the function doesn't need to repeat it.</p>
+
+
+
+
+
+
+
+
+                  <details class="mkdocstrings-source">
+                    <summary>Source code in <code>src/trajeval/adapters.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_fn</span> <span class="o">=</span> <span class="n">fn</span>
+</code></pre></div></td></tr></table></div>
+                  </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.adapters.OpenAIToolCallAdapter" class="doc doc-heading">
+              <code class="highlight language-python"><span class="n">trajeval</span><span class="o">.</span><span class="n">adapters</span><span class="o">.</span><span class="n">OpenAIToolCallAdapter</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">retrieval_tool_names</span><span class="p">,</span> <span class="n">query_arg_key</span><span class="o">=</span><span class="s1">&#39;query&#39;</span><span class="p">,</span> <span class="n">chunk_parser</span><span class="o">=</span><span class="n">_default_chunk_parser</span><span class="p">)</span></code>
+
+<a href="#trajeval.adapters.OpenAIToolCallAdapter" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Wraps a function that runs an agent and returns raw OpenAI messages.</p>
+<p><code>fn</code> receives the question and returns the message list produced by the
+chat-completions loop (system/user/assistant/tool messages, with
+<code>tool_calls</code> on assistant messages). This adapter converts that into a
+<code>Trajectory</code> via <code>parse_openai_messages</code>, so an agent that already speaks
+the standard tool-calling format needs no instrumentation at all.</p>
+
+
+
+
+
+
+
+
+                  <details class="mkdocstrings-source">
+                    <summary>Source code in <code>src/trajeval/adapters.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]],</span>
+    <span class="n">retrieval_tool_names</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">query_arg_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;query&quot;</span><span class="p">,</span>
+    <span class="n">chunk_parser</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">RetrievedChunk</span><span class="p">]]</span> <span class="o">=</span> <span class="n">_default_chunk_parser</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_fn</span> <span class="o">=</span> <span class="n">fn</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_retrieval_tool_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">retrieval_tool_names</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_query_arg_key</span> <span class="o">=</span> <span class="n">query_arg_key</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_parser</span> <span class="o">=</span> <span class="n">chunk_parser</span>
+</code></pre></div></td></tr></table></div>
+                  </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.adapters.TrajectoryRecorder" class="doc doc-heading">
+              <code class="highlight language-python"><span class="n">trajeval</span><span class="o">.</span><span class="n">adapters</span><span class="o">.</span><span class="n">TrajectoryRecorder</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span></code>
+
+<a href="#trajeval.adapters.TrajectoryRecorder" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Context manager for instrumenting an existing agent loop in place.</p>
+<p>::</p>
+<pre><code>with TrajectoryRecorder(question) as rec:
+    rec.thought("I should look this up.")
+    rec.retrieve(query="...", chunks=[{"doc_id": "d1", "text": "..."}])
+    rec.tool("calculator", args={"expr": "1+1"}, result=2)
+    rec.answer("42")
+trajectory = rec.trajectory
+</code></pre>
+<p><code>rec.trajectory</code> is only populated once the <code>with</code> block exits normally
+and <code>answer()</code> was called; an exception propagating out of the block
+leaves it <code>None</code> rather than building a trajectory from a run that never
+finished.</p>
+
+
+
+
+
+
+
+
+                  <details class="mkdocstrings-source">
+                    <summary>Source code in <code>src/trajeval/adapters.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">question</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_question</span> <span class="o">=</span> <span class="n">question</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_kwargs</span> <span class="o">=</span> <span class="n">metadata</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_steps</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_final_answer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">:</span> <span class="n">Trajectory</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</code></pre></div></td></tr></table></div>
+                  </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="trajeval.adapters.parse_openai_messages" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">trajeval</span><span class="o">.</span><span class="n">adapters</span><span class="o">.</span><span class="n">parse_openai_messages</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">question</span><span class="p">,</span> <span class="n">retrieval_tool_names</span><span class="p">,</span> <span class="n">query_arg_key</span><span class="o">=</span><span class="s1">&#39;query&#39;</span><span class="p">,</span> <span class="n">chunk_parser</span><span class="o">=</span><span class="n">_default_chunk_parser</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#trajeval.adapters.parse_openai_messages" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Convert a raw OpenAI chat-completions message list into a Trajectory.</p>
+<p>Scope: single-question tool-calling loops — one <code>user</code> message, any
+number of <code>assistant</code>/<code>tool</code> messages, ending in an <code>assistant</code> message
+with no tool calls. <code>system</code> messages are ignored. Multi-turn
+conversations (several <code>user</code> messages) are out of scope; use
+<code>CallableAdapter</code> or <code>TrajectoryRecorder</code> for those.</p>
+<p>Retrieval tool calls (name in <code>retrieval_tool_names</code>) become
+<code>RetrievalStep</code>s: the query is read from argument <code>query_arg_key</code>, and
+the result is parsed into chunks by <code>chunk_parser</code>. Every other tool call
+becomes a plain <code>ToolStep</code>. Assistant text preceding a tool call becomes
+a <code>ThoughtStep</code>; assistant text with no tool call is the final answer.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/trajeval/adapters.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parse_openai_messages</span><span class="p">(</span>
+    <span class="n">messages</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">question</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">retrieval_tool_names</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">query_arg_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;query&quot;</span><span class="p">,</span>
+    <span class="n">chunk_parser</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">RetrievedChunk</span><span class="p">]]</span> <span class="o">=</span> <span class="n">_default_chunk_parser</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trajectory</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a raw OpenAI chat-completions message list into a Trajectory.</span>
+
+<span class="sd">    Scope: single-question tool-calling loops — one `user` message, any</span>
+<span class="sd">    number of `assistant`/`tool` messages, ending in an `assistant` message</span>
+<span class="sd">    with no tool calls. `system` messages are ignored. Multi-turn</span>
+<span class="sd">    conversations (several `user` messages) are out of scope; use</span>
+<span class="sd">    `CallableAdapter` or `TrajectoryRecorder` for those.</span>
+
+<span class="sd">    Retrieval tool calls (name in `retrieval_tool_names`) become</span>
+<span class="sd">    `RetrievalStep`s: the query is read from argument `query_arg_key`, and</span>
+<span class="sd">    the result is parsed into chunks by `chunk_parser`. Every other tool call</span>
+<span class="sd">    becomes a plain `ToolStep`. Assistant text preceding a tool call becomes</span>
+<span class="sd">    a `ThoughtStep`; assistant text with no tool call is the final answer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">retrieval_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">retrieval_tool_names</span><span class="p">)</span>
+    <span class="n">tool_results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">m</span><span class="p">[</span><span class="s2">&quot;tool_call_id&quot;</span><span class="p">]:</span> <span class="n">m</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">messages</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;tool&quot;</span>
+    <span class="p">}</span>
+
+    <span class="n">steps</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">final_answer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+        <span class="n">role</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">role</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">role</span> <span class="o">!=</span> <span class="s2">&quot;assistant&quot;</span><span class="p">:</span>
+            <span class="k">continue</span>  <span class="c1"># &quot;tool&quot; messages are consumed via tool_results above</span>
+
+        <span class="n">content</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span>
+        <span class="n">tool_calls</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tool_calls&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tool_calls</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">content</span><span class="p">:</span>
+                <span class="n">final_answer</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+                <span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AnswerStep</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">final_answer</span><span class="p">))</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">content</span><span class="p">:</span>
+            <span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ThoughtStep</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">content</span><span class="p">)))</span>
+
+        <span class="k">for</span> <span class="n">call</span> <span class="ow">in</span> <span class="n">tool_calls</span><span class="p">:</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">call</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">fn</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">_try_json_parse</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;arguments&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;raw&quot;</span><span class="p">:</span> <span class="n">args</span><span class="p">}</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">_try_json_parse</span><span class="p">(</span><span class="n">tool_results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">call</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]))</span>
+
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">retrieval_names</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">query_arg_key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">query</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Retrieval tool call </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> has no </span><span class="si">{</span><span class="n">query_arg_key</span><span class="si">!r}</span><span class="s2"> &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;argument (args=</span><span class="si">{</span><span class="n">args</span><span class="si">!r}</span><span class="s2">). Pass a different &quot;</span>
+                        <span class="s2">&quot;query_arg_key if this tool names it something else.&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RetrievalStep</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">query</span><span class="p">),</span> <span class="n">chunks</span><span class="o">=</span><span class="n">chunk_parser</span><span class="p">(</span><span class="n">result</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ToolStep</span><span class="p">(</span><span class="n">tool_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">result</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">final_answer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;No final assistant message without tool calls was found — the &quot;</span>
+            <span class="s2">&quot;message list doesn&#39;t end in an answer, so no Trajectory.final_answer &quot;</span>
+            <span class="s2">&quot;can be determined.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Trajectory</span><span class="p">(</span>
+        <span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span>
+        <span class="n">final_answer</span><span class="o">=</span><span class="n">final_answer</span><span class="p">,</span>
+        <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="n">TrajectoryMetadata</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span> <span class="k">if</span> <span class="n">metadata</span> <span class="k">else</span> <span class="n">TrajectoryMetadata</span><span class="p">(),</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div><h2 id="results-schema">Results schema<a class="headerlink" href="#results-schema" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.results.RunResult" class="doc doc-heading">
+            <code>trajeval.results.RunResult</code>
+
+
+<a href="#trajeval.results.RunResult" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="trajeval.types.TrajevalModel">TrajevalModel</span></code></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.results.RunMetadata" class="doc doc-heading">
+            <code>trajeval.results.RunMetadata</code>
+
+
+<a href="#trajeval.results.RunMetadata" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="trajeval.types.TrajevalModel">TrajevalModel</span></code></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.results.TrajectoryResult" class="doc doc-heading">
+            <code>trajeval.results.TrajectoryResult</code>
+
+
+<a href="#trajeval.results.TrajectoryResult" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="trajeval.types.TrajevalModel">TrajevalModel</span></code></p>
+
+
+
+        <p>One golden record's outcome: either the trajectory plus every
+metric's score, or why it failed. Never both — see the module-level
+note on error handling.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.results.CalibrationState" class="doc doc-heading">
+            <code>trajeval.results.CalibrationState</code>
+
+
+<a href="#trajeval.results.CalibrationState" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="trajeval.types.TrajevalModel">TrajevalModel</span></code></p>
+
+
+
+        <p>Judge-vs-human agreement for one judged metric on this run.</p>
+<p>A judged metric with no <code>CalibrationState</code> entry — or one whose
+<code>is_calibrated</code> is False — has never been shown to agree with a human on
+this codebase's questions. Every consumer of <code>RunResult</code> (the CLI
+report, the web viewer) must surface that prominently rather than
+letting an uncalibrated score render as a clean, trustworthy number.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="trajectorystep-types">Trajectory/step types<a class="headerlink" href="#trajectorystep-types" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.types.Trajectory" class="doc doc-heading">
+            <code>trajeval.types.Trajectory</code>
+
+
+<a href="#trajeval.types.Trajectory" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="trajeval.types.TrajevalModel">TrajevalModel</span></code></p>
+
+
+
+        <p>The full record of an agent answering one question.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.types.TrajectoryMetadata" class="doc doc-heading">
+            <code>trajeval.types.TrajectoryMetadata</code>
+
+
+<a href="#trajeval.types.TrajectoryMetadata" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="trajeval.types.TrajevalModel">TrajevalModel</span></code></p>
+
+
+
+        <p>Run-level metadata: model, timing, token counts.</p>
+<p><code>extra="allow"</code> here (overriding the base class) because callers will
+reasonably want to stash adapter-specific extras (e.g. a provider request
+id) without us having anticipated every field up front. The named fields
+below are the ones metrics and reports are allowed to depend on.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.types.GoldenRecord" class="doc doc-heading">
+            <code>trajeval.types.GoldenRecord</code>
+
+
+<a href="#trajeval.types.GoldenRecord" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="trajeval.types.TrajevalModel">TrajevalModel</span></code></p>
+
+
+
+        <p>Ground truth for one question.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="trajeval.types.Step" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">trajeval</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Step</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">ThoughtStep</span> <span class="o">|</span> <span class="n">RetrievalStep</span> <span class="o">|</span> <span class="n">ToolStep</span> <span class="o">|</span> <span class="n">AnswerStep</span><span class="p">,</span> <span class="n">Field</span><span class="p">(</span><span class="n">discriminator</span><span class="o">=</span><span class="s1">&#39;step_type&#39;</span><span class="p">)]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#trajeval.types.Step" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.types.ThoughtStep" class="doc doc-heading">
+            <code>trajeval.types.ThoughtStep</code>
+
+
+<a href="#trajeval.types.ThoughtStep" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="trajeval.types.TrajevalModel">TrajevalModel</span></code></p>
+
+
+
+        <p>Reasoning text the agent emitted before acting.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.types.RetrievalStep" class="doc doc-heading">
+            <code>trajeval.types.RetrievalStep</code>
+
+
+<a href="#trajeval.types.RetrievalStep" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="trajeval.types.TrajevalModel">TrajevalModel</span></code></p>
+
+
+
+        <p>A single search: the query issued and what came back.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.types.ToolStep" class="doc doc-heading">
+            <code>trajeval.types.ToolStep</code>
+
+
+<a href="#trajeval.types.ToolStep" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="trajeval.types.TrajevalModel">TrajevalModel</span></code></p>
+
+
+
+        <p>A non-retrieval tool call: name, arguments, and result.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.types.AnswerStep" class="doc doc-heading">
+            <code>trajeval.types.AnswerStep</code>
+
+
+<a href="#trajeval.types.AnswerStep" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="trajeval.types.TrajevalModel">TrajevalModel</span></code></p>
+
+
+
+        <p>The agent producing its final response.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.types.RetrievedChunk" class="doc doc-heading">
+            <code>trajeval.types.RetrievedChunk</code>
+
+
+<a href="#trajeval.types.RetrievedChunk" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="trajeval.types.TrajevalModel">TrajevalModel</span></code></p>
+
+
+
+        <p>One chunk returned by a single retrieval call.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="cost-tracking">Cost tracking<a class="headerlink" href="#cost-tracking" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trajeval.cost.CostTracker" class="doc doc-heading">
+              <code class="highlight language-python"><span class="n">trajeval</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">CostTracker</span><span class="p">(</span><span class="n">_buckets</span><span class="o">=</span><span class="nb">dict</span><span class="p">())</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#trajeval.cost.CostTracker" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Accumulates token usage and estimated cost per label.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="trajeval.cost.estimate_cost_usd" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">trajeval</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">estimate_cost_usd</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">input_tokens</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">)</span></code>
+
+<a href="#trajeval.cost.estimate_cost_usd" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>None means "model not in the pricing table", not "free".</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/trajeval/cost.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">estimate_cost_usd</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">input_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;None means &quot;model not in the pricing table&quot;, not &quot;free&quot;.&quot;&quot;&quot;</span>
+    <span class="n">pricing</span> <span class="o">=</span> <span class="n">PRICING_PER_MILLION_TOKENS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pricing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">input_price</span><span class="p">,</span> <span class="n">output_price</span> <span class="o">=</span> <span class="n">pricing</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">input_tokens</span> <span class="o">/</span> <span class="mi">1_000_000</span><span class="p">)</span> <span class="o">*</span> <span class="n">input_price</span> <span class="o">+</span> <span class="p">(</span><span class="n">output_tokens</span> <span class="o">/</span> <span class="mi">1_000_000</span><span class="p">)</span> <span class="o">*</span> <span class="n">output_price</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
