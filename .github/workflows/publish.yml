@@ -51,7 +51,7 @@ jobs:
         working-directory: .
         run: python scripts/bundle_webapp.py
 
-      - uses: astral-sh/setup-uv@v3
+      - uses: astral-sh/setup-uv@v7
 
       # Safety gate: never publish a build that doesn't pass its own tests.
       - run: uv sync --all-extras
