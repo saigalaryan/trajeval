@@ -84,7 +84,7 @@ jobs:
           print(f'OK: {len(names)} files in wheel, {len(webapp_files)} from the bundled viewer')
           "
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: trajeval-dist
           path: packages/trajeval/dist/
