@@ -36,7 +36,7 @@ jobs:
       UV_PYTHON: "3.11"
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v3
+      - uses: astral-sh/setup-uv@v7
 
       - run: uv sync --extra docs
 

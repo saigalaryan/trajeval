@@ -32,7 +32,7 @@ jobs:
       UV_PYTHON: "3.11"
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v3
+      - uses: astral-sh/setup-uv@v7
 
       - run: uv sync --all-extras
       - run: uv run ruff format --check .
@@ -60,7 +60,7 @@ jobs:
       UV_PYTHON: ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v3
+      - uses: astral-sh/setup-uv@v7
 
       - run: uv sync --all-extras
       - run: uv run pytest --cov=trajeval --cov-report=term-missing
@@ -102,7 +102,7 @@ jobs:
       - name: Build and bundle the web viewer
         run: python scripts/bundle_webapp.py
 
-      - uses: astral-sh/setup-uv@v3
+      - uses: astral-sh/setup-uv@v7
       - name: Build the wheel
         working-directory: packages/trajeval
         run: uv build
