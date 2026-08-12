@@ -24,7 +24,7 @@ jobs:
       # prior main-branch run simply misses the cache — that's the
       # no-baseline case the action handles gracefully.
       - name: Restore baseline
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: results/baseline.json
           key: trajeval-baseline-${{ github.event.pull_request.base.sha || github.sha }}
@@ -45,7 +45,7 @@ jobs:
 
       - name: Save baseline
         if: github.ref == 'refs/heads/main'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: results/baseline.json
           key: trajeval-baseline-${{ github.sha }}
