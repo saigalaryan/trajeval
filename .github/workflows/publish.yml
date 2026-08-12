@@ -39,7 +39,7 @@ jobs:
       # tells `uv sync`/`uv run` which interpreter to use.
       UV_PYTHON: "3.11"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The wheel bundles apps/web's static export as package data (see
       # scripts/bundle_webapp.py) so `trajeval serve` works with zero Node
